@@ -55,18 +55,12 @@ MODULE mp2_ri_gpw
         dbcsr_iterator_start, dbcsr_iterator_stop, dbcsr_iterator_type, dbcsr_multiply, &
         dbcsr_p_type, dbcsr_put_block, dbcsr_release, dbcsr_release_p, dbcsr_reserve_blocks, &
         dbcsr_set, dbcsr_type, dbcsr_type_no_symmetry, dbcsr_type_real_8
-   USE dbcsr_tensor,                    ONLY: dbcsr_t_contract,&
-                                              dbcsr_t_get_block,&
-                                              dbcsr_t_get_stored_coordinates,&
-                                              dbcsr_t_put_block,&
-                                              dbcsr_t_reserve_blocks
-   USE dbcsr_tensor_types,              ONLY: dbcsr_t_create,&
-                                              dbcsr_t_destroy,&
-                                              dbcsr_t_distribution_destroy,&
-                                              dbcsr_t_distribution_new,&
-                                              dbcsr_t_distribution_type,&
-                                              dbcsr_t_nd_mp_comm,&
-                                              dbcsr_t_type
+   USE dbcsr_tensor_api,                ONLY: &
+        dbcsr_t_contract, dbcsr_t_get_block, dbcsr_t_get_stored_coordinates,&
+        dbcsr_t_put_block, dbcsr_t_reserve_blocks,&
+        dbcsr_t_create, dbcsr_t_destroy, dbcsr_t_distribution_destroy,&
+        dbcsr_t_distribution_new, dbcsr_t_distribution_type,&
+        dbcsr_t_nd_mp_comm, dbcsr_t_type
    USE gaussian_gridlevels,             ONLY: gaussian_gridlevel
    USE input_constants,                 ONLY: do_eri_gpw,&
                                               do_eri_mme,&

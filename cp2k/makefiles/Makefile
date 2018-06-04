@@ -28,6 +28,9 @@ SRCDIR       := $(CP2KHOME)/src
 EXEDIR       := $(MAINEXEDIR)/$(ARCH)
 REVISION     := $(shell $(CP2KHOME)/tools/build_utils/get_revision_number $(SRCDIR))
 
+EXTSDIR      := exts
+EXTSHOME     := $(CP2KHOME)/$(EXTSDIR)
+EXTSPACKAGES := $(shell ls $(EXTSHOME) -I Makefile.inc)
 
 # Discover programs =========================================================
 ifeq ($(ALL_EXE_FILES),)
@@ -40,9 +43,11 @@ EXE_NAMES := $(basename $(notdir $(ALL_EXE_FILES)))
 ifneq ($(ONEVERSION),)
 MODDEPS = "lower"
 include $(CP2KHOME)/arch/$(ARCH).$(ONEVERSION)
-LIBDIR  := $(MAINLIBDIR)/$(ARCH)/$(ONEVERSION)
-OBJDIR  := $(MAINOBJDIR)/$(ARCH)/$(ONEVERSION)
-TSTDIR  := $(MAINTSTDIR)/$(ARCH)/$(ONEVERSION)
+LIBDIR     := $(MAINLIBDIR)/$(ARCH)/$(ONEVERSION)
+LIBEXTSDIR := $(LIBDIR)/$(EXTSDIR)
+OBJDIR     := $(MAINOBJDIR)/$(ARCH)/$(ONEVERSION)
+OBJEXTSDIR := $(OBJDIR)/$(EXTSDIR)
+TSTDIR     := $(MAINTSTDIR)/$(ARCH)/$(ONEVERSION)
 ifeq ($(NVCC),)
 EXE_NAMES := $(basename $(notdir $(filter-out %.cu, $(ALL_EXE_FILES))))
 endif
@@ -56,7 +61,7 @@ endif
 # Declare PHONY targets =====================================================
 .PHONY : $(VERSION) $(EXE_NAMES) \
          dirs makedep default_target all \
-         toolversions libcp2k \
+         toolversions libcp2k exts \
          doxify doxifyclean \
          pretty prettyclean doxygen/clean doxygen \
          install clean realclean distclean mrproper help \
@@ -122,10 +127,10 @@ else
 # stage 3: Include arch-file, create dirs, and run makedep.py for given $(ONEVERSION).
 #          Afterwards, call make recursively again with -C $(OBJDIR) and INCLUDE_DEPS=true
 ifeq ($(INCLUDE_DEPS),)
-$(EXE_NAMES): dirs makedep
+$(EXE_NAMES): makedep | dirs exts
 	@+$(MAKE) --no-print-directory -C $(OBJDIR) -f $(MAKEFILE) $(EXEDIR)/$@.$(ONEVERSION) INCLUDE_DEPS=true
 
-all: dirs makedep
+all: makedep | dirs exts
 	@+$(MAKE) --no-print-directory -C $(OBJDIR) -f $(MAKEFILE) all INCLUDE_DEPS=true
 
 # foreground testing, compilation happens in do_regtest
@@ -136,13 +141,17 @@ test: dirs
 testbg: dirs makedep all
 	@+$(MAKE) --no-print-directory -C $(TSTDIR) -f $(MAKEFILE) testbg INCLUDE_DEPS=true
 
-libcp2k: dirs makedep
+libcp2k: makedep | dirs exts
 	@+$(MAKE) --no-print-directory -C $(OBJDIR) -f $(MAKEFILE) $(LIBDIR)/libcp2k$(ARCHIVE_EXT) INCLUDE_DEPS=true
 
+exts: $(EXTSPACKAGES)
+include $(EXTSHOME)/Makefile.inc
 
 dirs:
 	@mkdir -p $(OBJDIR)
+	@mkdir -p $(OBJEXTSDIR)
 	@mkdir -p $(LIBDIR)
+	@mkdir -p $(LIBEXTSDIR)
 	@mkdir -p $(EXEDIR)
 	@mkdir -p $(TSTDIR)
 

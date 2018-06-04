@@ -1,0 +1,5 @@
+{
+"description": "Backend API of accelerator support",
+"archive": "libdbcsr",
+"requires": []
+}

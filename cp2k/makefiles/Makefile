@@ -56,6 +56,7 @@ ifneq ($(LD_SHARED),)
 else
  ARCHIVE_EXT := .a
 endif
+include $(EXTSHOME)/Makefile.inc
 endif
 
 # Declare PHONY targets =====================================================
@@ -145,7 +146,6 @@ libcp2k: makedep | dirs exts
 	@+$(MAKE) --no-print-directory -C $(OBJDIR) -f $(MAKEFILE) $(LIBDIR)/libcp2k$(ARCHIVE_EXT) INCLUDE_DEPS=true
 
 exts: $(EXTSPACKAGES)
-include $(EXTSHOME)/Makefile.inc
 
 dirs:
 	@mkdir -p $(OBJDIR)

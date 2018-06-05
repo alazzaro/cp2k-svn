@@ -30,7 +30,7 @@ REVISION     := $(shell $(CP2KHOME)/tools/build_utils/get_revision_number $(SRCD
 
 EXTSDIR      := exts
 EXTSHOME     := $(CP2KHOME)/$(EXTSDIR)
-EXTSPACKAGES := $(shell ls $(EXTSHOME) -I Makefile.inc)
+EXTSPACKAGES := $(shell ls $(EXTSHOME) -I Makefile.inc -I VERSIONS)
 
 # Discover programs =========================================================
 ifeq ($(ALL_EXE_FILES),)
@@ -66,8 +66,8 @@ endif
          doxify doxifyclean \
          pretty prettyclean doxygen/clean doxygen \
          install clean realclean distclean mrproper help \
-         test testbg testclean testrealclean
-
+         test testbg testclean testrealclean \
+	 $(EXTSPACKAGES)
 
 # Discover files and directories ============================================
 ALL_SRC_DIRS := $(shell find $(SRCDIR) -type d ! -name preprettify  ! -path "*/.svn*" | awk '{printf("%s:",$$1)}')
@@ -185,6 +185,9 @@ endif
 	/usr/bin/env python --version
 
 else
+
+# Force CP2K recompilations if exts are updated
+$(ALL_OBJECTS): $(EXTSHOME)/VERSIONS
 
 # stage 4: Include $(OBJDIR)/all.dep, expand target all and libcp2k, and perform actual build.
 all: $(foreach e, $(EXE_NAMES), $(EXEDIR)/$(e).$(ONEVERSION))

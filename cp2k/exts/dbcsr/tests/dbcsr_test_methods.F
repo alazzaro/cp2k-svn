@@ -52,18 +52,18 @@ MODULE dbcsr_test_methods
         dbcsr_type, dbcsr_type_antihermitian, dbcsr_type_antisymmetric, dbcsr_type_complex_4, &
         dbcsr_type_complex_8, dbcsr_type_hermitian, dbcsr_type_no_symmetry, dbcsr_type_real_4, &
         dbcsr_type_real_8, dbcsr_type_real_default, dbcsr_type_symmetric
-   USE dbcsr_util,                      ONLY: dbcsr_verify_matrix
+   USE dbcsr_dist_util,                 ONLY: dbcsr_verify_matrix
    USE dbcsr_work_operations,           ONLY: dbcsr_create,&
                                               dbcsr_finalize,&
                                               dbcsr_work_create
-   USE kinds,                           ONLY: default_string_length,&
+   USE dbcsr_kinds,                     ONLY: default_string_length,&
                                               dp,&
                                               int_8,&
                                               real_4,&
                                               real_8
-   USE message_passing,                 ONLY: mp_comm_null,&
+   USE dbcsr_message_passing,           ONLY: mp_comm_null,&
                                               mp_environ
-#include "base/base_uses.f90"
+#include "base/dbcsr_base_uses.f90"
 
 !$ USE OMP_LIB, ONLY: omp_get_max_threads, omp_get_thread_num, omp_get_num_threads
 

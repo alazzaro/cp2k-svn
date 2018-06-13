@@ -18,8 +18,10 @@
 MODULE f77_interface
    USE acc_device,                      ONLY: acc_get_ndevices,&
                                               acc_set_active_device
-   USE base_hooks,                      ONLY: timeset_hook, timestop_hook,&
-                                              cp_abort_hook, cp_warn_hook
+   USE base_hooks,                      ONLY: cp_abort_hook,&
+                                              cp_warn_hook,&
+                                              timeset_hook,&
+                                              timestop_hook
    USE bibliography,                    ONLY: add_all_references
    USE cell_types,                      ONLY: cell_type,&
                                               init_cell

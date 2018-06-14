@@ -7,5 +7,4 @@ exe/
 src/libsmm_acc/libcusmm/libcusmm.cu
 src/libsmm_acc/libcusmm/libcusmm_part*.cu
 install/
-arch/local.mdbg
-arch/local_cuda.mdbg
+arch/local*

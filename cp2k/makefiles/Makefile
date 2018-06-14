@@ -30,7 +30,7 @@ REVISION     := $(shell $(CP2KHOME)/tools/build_utils/get_revision_number $(SRCD
 
 EXTSDIR      := exts
 EXTSHOME     := $(CP2KHOME)/$(EXTSDIR)
-EXTSPACKAGES := $(shell ls $(EXTSHOME) -I Makefile.inc -I VERSIONS)
+EXTSPACKAGES := $(shell cd $(EXTSHOME) ; find * -maxdepth 0 -type d )
 
 # Discover programs =========================================================
 ifeq ($(ALL_EXE_FILES),)

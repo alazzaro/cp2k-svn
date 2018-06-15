@@ -35,6 +35,7 @@ def main(argv):
     #triples += combinations(9,12)
     #triples += combinations(5,13,16,32)
     triples += combinations(6,7,8)
+    triples += combinations(13,14,25,26,32)
 
     usage = "Generator of LibCuSMM. The Library for Cuda Small Matrix Multiplications."
     parser = OptionParser(usage)
@@ -151,7 +152,7 @@ def gen_process(plan):
     output += "default: missing = true;\n"
     output += "}\n\n"
 
-    output += "if(missing) return -2; // kernel doesn't not exist \n"
+    output += "if(missing) return -1;\n"
 
     idx_map = dict()
     for (m,n,k) in plan.keys():
@@ -168,7 +169,7 @@ def gen_process(plan):
         output += "a_data, b_data, c_data);\n\n"
     output += "}\n\n"
 
-    output += "return -2; // kernel doesn't exist \n"
+    output += "return -1; // should never happen\n"
     output += "}\n\n\n"
 
     output += '#define dbcsr_type_real_4     1\n'
@@ -218,29 +219,16 @@ def gen_transpose(sizes):
 
     output += "int idx = 0;\n"
     output += "bool missing = false;\n\n"
-
-    # Map for m sizes
-    m_min = m_vals[0]
-    m_max = m_vals[-1]
-    map_m_sizes = [ -1 for m in range(m_max-m_min+1) ]
-
     output += "switch(m){\n"
     for i, m in enumerate(m_vals):
         output += "case %d: idx = %d; break;\n"%(m, i)
-        map_m_sizes[m-m_min] = i
     output += "default: missing = true;\n"
     output += "}\n\n"
-
-    # Map for n sizes
-    n_min = n_vals[0]
-    n_max = n_vals[-1]
-    map_n_sizes = [ -1 for n in range(n_max-n_min+1) ]
 
     output += "idx *= %d;\n"%len(n_vals)
     output += "switch(n){\n"
     for i, n in enumerate(n_vals):
         output += "case %d: idx += %d; break;\n"%(n, i)
-        map_n_sizes[n-n_min] = i
     output += "default: missing = true;\n"
     output += "}\n\n"
 
@@ -252,17 +240,12 @@ def gen_transpose(sizes):
         idx = m_vals.index(m)*len(n_vals) + n_vals.index(n)
         idx_map[idx] = (m,n)
 
-    # Initialize the map of kernels with zeros
-    map_kernels = [ 0 for i in range(len(m_vals)*len(n_vals)) ]
-
     output += "typedef void (*kernel)(int *, int , double*);\n"
     for idx in sorted(idx_map.keys()):
         mn = idx_map[idx]
         output += "// m=%d, n=%d\n"%mn
         output += "static kernel kern_func_%d = transpose_d<%d,%d>;\n"%(idx, mn[0], mn[1])
         output += "static bool configured_%d = false;\n"%idx
-        map_kernels[idx] = 1
-        
     output += "\n\n"
 
     output += "switch(idx){\n"
@@ -291,59 +274,7 @@ def gen_transpose(sizes):
     output += 'if(datatype != dbcsr_type_real_8)\n'
     output += '  return 0; //transpose not needed\n'
     output += 'return libcusmm_transpose_d((int *) trs_stack, offset, nblks, (double *) buffer, m, n, custream);\n'
-    output += '};\n\n'
-
-    output_map_kernels  = 'extern "C" int libsmm_acc_has_transposed '
-    output_map_kernels  += '(int m, int n) {\n'
-
-    # Map for existing transposed kernels
-    output_map_kernels += "  static const int m_min = %d;\n"%m_min
-    output_map_kernels += "  static const int m_max = %d;\n"%m_max
-    output_map_kernels += "  static const int map_m_sizes[%d] = {\n"%(len(map_m_sizes))
-    map_m_sizes = map(str, map_m_sizes)
-    output_map_kernels += ', '.join(map_m_sizes)
-    output_map_kernels += "  }; \n\n"
-
-    output_map_kernels += "  static const int n_min = %d;\n"%n_min
-    output_map_kernels += "  static const int n_max = %d;\n"%n_max
-    output_map_kernels += "  static const int map_n_sizes[%d] = {\n"%(len(map_n_sizes))
-    map_n_sizes = map(str, map_n_sizes)
-    output_map_kernels += ', '.join(map_n_sizes)
-    output_map_kernels += "  }; \n\n"
-    
-    output_map_kernels += "  static const int map_kernels[%d] = {\n"%(len(map_kernels))
-    map_kernels = map(str, map_kernels)
-    output_map_kernels += ', '.join(map_kernels)
-    output_map_kernels += "  }; \n\n"
-
-    output_map_kernels += "  if (m<m_min || m>m_max || n<n_min || n>n_max) return 0; // no kernel found\n";
-    output_map_kernels += "  if (map_m_sizes[m-m_min]<0) return 0;\n";
-    output_map_kernels += "  if (map_n_sizes[n-n_min]<0) return 0;\n\n";
-
-    
-
-    output_map_kernels += "}\n"
-
-
-#    for i in range(m_max):
-#        output_map_kernels += str(map_kernels[m][0])
-#        for n in range(1, n_max):
-#          output_map_kernels += ", "+str(map_kernels[m][n])
-#        if m<m_max-1:
-#             output_map_kernels += ", "
-#        output_map_kernels += "\n"
-#    output_map_kernels += "}; \n\n"    
-
-#    output_map_kernels = "static cont char transposed_kernels_map[%d][%d] = {\n"%(m_max, n_max)
-#    for m in range(m_max):
-#        output_map_kernels += str(map_kernels[m][0])
-#        for n in range(1, n_max):
-#          output_map_kernels += ", "+str(map_kernels[m][n])
-#        if m<m_max-1:
-#             output_map_kernels += ", "
-#        output_map_kernels += "\n"
-#    output_map_kernels += "}; \n\n"
-    output += output_map_kernels
+    output += '};\n'
 
     return(output)
 

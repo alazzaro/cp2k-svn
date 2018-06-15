@@ -5,7 +5,7 @@ SHELL = /bin/sh
 #
 DBCSRHOME    ?= $(CURDIR)
 MAKEFILE     := $(DBCSRHOME)/Makefile
-DOXYGENDIR   := $(DBCSRHOME)/doc/doxygen
+DOXYGENDIR   := $(DBCSRHOME)/doc
 BINDIR       := $(DBCSRHOME)/bin
 LIBDIR       ?= $(DBCSRHOME)/lib
 OBJDIR       ?= $(DBCSRHOME)/obj
@@ -16,7 +16,7 @@ SRCDIR       := $(DBCSRHOME)/src
 TESTSDIR     := $(DBCSRHOME)/tests
 EXAMPLESDIR  := $(DBCSRHOME)/examples
 PREFIX       ?= $(DBCSRHOME)/install
-INCLUDEMAKE  ?= $(DBCSRHOME)/Makefile.inc 
+INCLUDEMAKE  ?= $(DBCSRHOME)/Makefile.inc
 
 # Default Target ============================================================
 LIBNAME      := dbcsr
@@ -156,7 +156,7 @@ else
 # stage 3: Perform actual build.
 $(BIN_NAME).o: $(BIN_DEPS)
 
-$(BINDIR)/%.x: %.o $(LIBRARY) | silent
+$(BINDIR)/%.x: %.o $(LIBDIR)/$(LIBRARY)$(ARCHIVE_EXT) | silent
 	$(LD) $(LDFLAGS) -L$(LIBDIR) -o $@ $< $(BIN_DEPS) -l$(LIBNAME) $(LIBS)
 
 # Silent the target if it is already up to date
@@ -218,7 +218,7 @@ OTHER_HELP += "clean : Remove intermediate object and mod files, but not the lib
 # delete the intermediate files, the programs and libraries and anything that might be in the objdir or libdir directory
 # Use this if you want to fully rebuild an executable (for a given compiler)
 #
-realclean: clean
+realclean: clean doxygen/clean
 	rm -rf $(BINDIR) $(LIBDIR) $(PREFIX) 
 	rm -rf `find $(DBCSRHOME) -name "*.pyc"`
 OTHER_HELP += "realclean : Remove all files"
@@ -307,7 +307,7 @@ doxygen: doxygen/clean
 	@echo "<html><body>Sorry, the Doxygen documentation is currently being updated. Please try again in a few minutes.</body></html>" > $(DOXYGENDIR)/html/index.html
 	cp $(ALL_SRC_FILES) $(DOXYGENDIR)
 	@for i in $(DOXYGENDIR)/*.F ; do mv $${i}  $${i%%.*}.f90; done ;
-	@cat $(TOOLSRC)/doxify/Doxyfile.template | sed "s/#revision#/`$(TOOLSRC)/build_utils/get_revision_number $(DBCSRHOME)`/"  >$(DOXYGENDIR)/Doxyfile
+	@cat $(TOOLSRC)/doxify/Doxyfile.template > $(DOXYGENDIR)/Doxyfile
 	cd $(DOXYGENDIR); doxygen ./Doxyfile 2>&1 | tee ./html/doxygen.out
 TOOL_HELP += "doxygen : Generate the doxygen documentation"
 
@@ -376,11 +376,11 @@ FYPPFLAGS ?= -n
 %.o: %.F
 ifneq ($(CPP),)
 	$(TOOLSRC)/build_utils/fypp $(FYPPFLAGS) $< $*.fypped
-	$(CPP) $(CPPFLAGS) -D__SHORT_FILE__="\"$(subst $(SRCDIR)/,,$<)\"" -I'$(dir $<)' $*.fypped > $*.f90
+	$(CPP) $(CPPFLAGS) -D__SHORT_FILE__="\"$(notdir $<)\"" -I'$(dir $<)' $*.fypped > $*.f90
 	$(FC) -c $(FCFLAGS) $*.f90 $(FCLOGPIPE)
 else
 	$(TOOLSRC)/build_utils/fypp $(FYPPFLAGS) $< $*.F90
-	$(FC) -c $(FCFLAGS) -D__SHORT_FILE__="\"$(subst $(SRCDIR)/,,$<)\"" -I'$(dir $<)' -I'$(SRCDIR)' $*.F90 $(FCLOGPIPE)
+	$(FC) -c $(FCFLAGS) -D__SHORT_FILE__="\"$(notdir $<)\"" -I'$(dir $<)' -I'$(SRCDIR)' $*.F90 $(FCLOGPIPE)
 endif
 
 %.o: %.c
@@ -424,7 +424,7 @@ else
 # it is useful in a two-stage compile.
 #
 %.mod: %.F
-	$(MC) -c $(FCFLAGS) -D__SHORT_FILE__="\"$(subst $(SRCDIR)/,,$<)\"" $<
+	$(MC) -c $(FCFLAGS) -D__SHORT_FILE__="\"$(notdir $<)\"" $<
 endif
 
 #EOF

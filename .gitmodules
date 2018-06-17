@@ -1,0 +1,3 @@
+[submodule "cp2k/exts/dbcsr"]
+	path = cp2k/exts/dbcsr
+	url = https://github.com/cp2k/dbcsr

@@ -1,5 +1,5 @@
 
-LIBS += -L$(LIBEXTSDIR)/dbcsr -ldbcsr
+LIBS := -L$(LIBEXTSDIR)/dbcsr -ldbcsr $(LIBS)
 dbcsr: 
 	$(MAKE) -C $(EXTSHOME)/$@ \
 	   INCLUDEMAKE=$(CP2KHOME)/arch/$(ARCH).$(ONEVERSION) \

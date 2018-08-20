@@ -79,6 +79,9 @@ OBJ_SRC_FILES += $(shell cd $(SRCDIR); find . ! -path "*/preprettify/*" -name "*
 OBJ_SRC_FILES += $(shell cd $(SRCDIR); find . ! -path "*/preprettify/*" -name "*.cpp")
 OBJ_SRC_FILES += $(shell cd $(SRCDIR); find . ! -path "*/preprettify/*" -name "*.cxx")
 OBJ_SRC_FILES += $(shell cd $(SRCDIR); find . ! -path "*/preprettify/*" -name "*.cc")
+ifneq ($(NVCC),)
+OBJ_SRC_FILES += $(shell cd $(SRCDIR); find . ! -path "*/preprettify/*" -name "*.cu")
+endif
 
 # Included files used by Fypp preprocessor and standard includes
 INCLUDED_SRC_FILES = $(filter-out base_uses.f90, $(notdir $(shell find $(SRCDIR) ! -path "*/preprettify/*" -name "*.f90")))

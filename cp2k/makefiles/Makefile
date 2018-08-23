@@ -190,7 +190,7 @@ endif
 else
 
 # Force CP2K recompilations if exts are updated
-$(ALL_OBJECTS): $(EXTSHOME)/VERSIONS
+$(ALL_OBJECTS): $(EXTSDEPS)
 
 # stage 4: Include $(OBJDIR)/all.dep, expand target all and libcp2k, and perform actual build.
 all: $(foreach e, $(EXE_NAMES), $(EXEDIR)/$(e).$(ONEVERSION))
